@@ -29,5 +29,40 @@ router.post('/', async (req, res) => {
   }
 });
 
+//POST route for scores
+router.post('/scores', async (req, res) => {
+  const { idea_id, market_potential, uniqueness, team_fit, monetization, feasibility } = req.body;
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO scores (idea_id, market_potential, uniqueness, team_fit, monetization, feasibility)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [idea_id, market_potential, uniqueness, team_fit, monetization, feasibility]
+    );
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Error saving score');
+  }
+});
+
+// GET route for scores
+router.get('/scores/:ideaId', async (req, res) => {
+  const { ideaId } = req.params;
+
+  try {
+    const result = await pool.query(
+      `SELECT * FROM scores WHERE idea_id = $1`,
+      [ideaId]
+    );
+
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Error fetching scores');
+  }
+});
+
 
 module.exports = router;
